@@ -1,26 +1,25 @@
 from flask import Flask, render_template
+from config import Config
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
 
-    @app.route("/")
-    def home():
-        return render_template('index.html')
+    # connect Config class to application instance
+    app.config.from_object(Config)
 
-    @app.route("/login")
-    def login():
-        return render_template('login.html')
+    migrate = Migrate()
 
-    @app.route("/register")
-    def register():
-        return render_template('register.html')
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-    @app.route("/about")
-    def about():
-        return render_template('about.html')
+    from app.blueprints.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
-    @app.route("/blog")
-    def blog():
-        return render_template('blog.html')
+    from app.blueprints.api import bp as api_bp
+    app.register_blueprint(api_bp)
 
     return app
